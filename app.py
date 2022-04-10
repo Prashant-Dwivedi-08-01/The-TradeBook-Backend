@@ -5,7 +5,7 @@ from config.extensions import jwt
 from flask import Flask
 from api import user_api
 from logging.config import dictConfig
-
+from flask_cors import CORS
 from models.jwt_blocklist_model import TokenBlocklist
 from dotenv import load_dotenv
 import os
@@ -13,6 +13,7 @@ load_dotenv()
 
 
 app = Flask(__name__)
+CORS(app)
 app.config['MONGODB_SETTINGS'] = {
     'host': os.getenv("DATABASE_HOST"),
 }
@@ -46,7 +47,6 @@ def check_if_token_revoked(jwt_header, jwt_payload):
     return token is not None
 
 app.register_blueprint(user_api.user_api, url_prefix = "/api")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
