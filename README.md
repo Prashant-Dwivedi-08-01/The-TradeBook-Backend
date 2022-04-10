@@ -1,4 +1,4 @@
-# The TradeBook
+# The TradeBook ( Under Development )
 
 This is an interesting project which came to my mind, when I found it difficult to document my own trades. Documenting your trades is of at most importance and that is what seperates a novice trader from a professionl.
 
