@@ -1,0 +1,5 @@
+USER_REGISTRATION_ERROR = "Error in registering the user"
+USER_LOGIN_ERROR = "Error in logging the user"
+FETCH_USERS_ERROR = "Error in fetching the user details"
+ACCOUNT_DELETE_ERROR = "Error in deleting the user account"
+LOGOUT_ERROR = "Error in loggin out"
