@@ -1,5 +1,4 @@
 
-from crypt import methods
 from flask_restful import  Api
 from flask import Blueprint
 from models.user_model import User
@@ -16,7 +15,7 @@ user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
 
 
-@user_api.route("/", methods="GET")
+@user_api.route("/", methods=["GET"])
 def index():
     return set_response(data={
         "msg":"Welcome"
