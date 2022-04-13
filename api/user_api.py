@@ -1,4 +1,5 @@
 
+from crypt import methods
 from flask_restful import  Api
 from flask import Blueprint
 from models.user_model import User
@@ -13,7 +14,13 @@ from utils.common import revoke_jwt_token
 
 user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
-    
+
+
+@user_api.root_path("/", methods="GET")
+def index():
+    return set_response(data={
+        "msg":"Welcome"
+    })
 
 @user_api.route("/register", methods=["POST"])
 def register():
