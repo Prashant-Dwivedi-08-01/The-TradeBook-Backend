@@ -15,9 +15,9 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 app.config['MONGODB_SETTINGS'] = {
-    'host': "mongodb+srv://Prashant:Prashant123@cluster0.myzaa.mongodb.net/TradeBook?retryWrites=true&w=majority" #os.getenv("DATABASE_HOST"),
+    'host': os.getenv("DATABASE_HOST"),
 }
-app.config["JWT_SECRET_KEY"] = "my_trade_book"#os.getenv("JWT_SECRET_KEY")
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 
 
