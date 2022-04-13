@@ -107,7 +107,8 @@ def login():
         app.logger.info("%s Logged in successfully", email)
         res = {
             "msg":"Login Successful",
-            "access_token": access_token
+            "access_token": access_token,
+            "user_details": user.to_json()
         }
         return set_response(data=res)
     except Exception as ex:
