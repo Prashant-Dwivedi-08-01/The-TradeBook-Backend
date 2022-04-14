@@ -6,7 +6,12 @@ from flask import request
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
-from utils.constants import ACCOUNT_DELETE_ERROR, FETCH_USERS_ERROR, LOGOUT_ERROR, USER_LOGIN_ERROR, USER_REGISTRATION_ERROR
+from utils.constants import( 
+    ACCOUNT_DELETE_ERROR, 
+    FETCH_USERS_ERROR, 
+    LOGOUT_ERROR, 
+    USER_LOGIN_ERROR, 
+    USER_REGISTRATION_ERROR)
 from utils.response import set_response
 from flask import current_app as app
 from utils.common import revoke_jwt_token
@@ -63,14 +68,14 @@ def register():
         user.set_password(password)
         user.save()
 
-        app.logger.info("%s Registered successfully", email)
+        app.logger.info("[%s] Registered successfully", email)
         res = {
             "msg":"User registered successfully",
             "user_details": user.to_json()
         }
         return set_response(data=res)
     except Exception as ex:
-        app.logger.error("%s Error in registering the user. Error: %s. Exception %s", email, err_msg, str(ex))
+        app.logger.error("[%s] Error in registering the user. Error: %s. Exception %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = USER_REGISTRATION_ERROR
         return set_response(error=err_msg)
@@ -104,7 +109,7 @@ def login():
 
         access_token = create_access_token(identity=user.to_json())
 
-        app.logger.info("%s Logged in successfully", email)
+        app.logger.info("[%s] Logged in successfully", email)
         res = {
             "msg":"Login Successful",
             "access_token": access_token,
@@ -112,7 +117,7 @@ def login():
         }
         return set_response(data=res)
     except Exception as ex:
-        app.logger.error("%s Error in logging. Error: %s. Exception: %s", email, err_msg, str(ex))
+        app.logger.error("[%s] Error in logging. Error: %s. Exception: %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = USER_LOGIN_ERROR
         return set_response(error=err_msg)
@@ -131,10 +136,10 @@ def getUsers():
             "users": users
         }
 
-        app.logger.info("%s All users information fetched successfully.",user.email)
+        app.logger.info("[%s] All users information fetched successfully.",user.email)
         return set_response(data=res)
     except Exception as ex:
-        app.logger.error("%s Error in fetching the users. Error: %s.  Exception: %s", user.email, err_msg, str(ex))
+        app.logger.error("[%s] Error in fetching the users. Error: %s.  Exception: %s", user.email, err_msg, str(ex))
         if not err_msg:
             err_msg = FETCH_USERS_ERROR
         return set_response(error=err_msg)
@@ -159,14 +164,14 @@ def delete_account():
 
         revoke_jwt_token()
 
-        app.logger.info("%s Account Deleted Successfully.", user.email)
+        app.logger.info("[%s] Account Deleted Successfully.", user.email)
         
         res = {
             "msg": "Account deleted successfully"
         }
         return set_response(data=res)
     except Exception as ex:
-        app.logger.error("%s Error in deleting the account. Error: %s. Exception: %s", user.email, err_msg, str(ex))  
+        app.logger.error("[%s] Error in deleting the account. Error: %s. Exception: %s", user.email, err_msg, str(ex))  
         if not err_msg:
             err_msg = ACCOUNT_DELETE_ERROR
         return set_response(error=err_msg)
@@ -182,7 +187,7 @@ def logout():
 
         revoke_jwt_token()
 
-        app.logger.info("%s Logged Out Successfully", user.email)
+        app.logger.info("[%s] Logged Out Successfully", user.email)
         res = {
             "msg": "Logged Out Successfully"
         }
@@ -190,7 +195,7 @@ def logout():
         return set_response(data=res)
 
     except Exception as ex:
-        app.logger.error("%s Error in loggin out. Error: %s. Exception: %s", user.email, err_msg, str(ex))
+        app.logger.error("[%s] Error in loggin out. Error: %s. Exception: %s", user.email, err_msg, str(ex))
         if not err_msg:
             err_msg = LOGOUT_ERROR
         return set_response(error=err_msg)

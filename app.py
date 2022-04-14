@@ -5,6 +5,7 @@ from config.extensions import jwt
 from flask import Flask
 from api import user_api
 from logging.config import dictConfig
+import logging
 from flask_cors import CORS
 from models.jwt_blocklist_model import TokenBlocklist
 from dotenv import load_dotenv
@@ -36,6 +37,13 @@ dictConfig({
         'handlers': ['wsgi']
     }
 })
+
+logger_blocklist = [
+    "_internal",
+]
+
+for module in logger_blocklist:
+    logging.getLogger(module).setLevel(logging.ERROR)
 
 jwt.init_app(app)
 db.init_app(app)
