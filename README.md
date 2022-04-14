@@ -7,4 +7,6 @@ One who documents his/her trades tends to not to repeat the same mistake.
 This platform ( upon completion ) will have the facility to document trades with entry, exit, dates, chart Images, notes, etc all in a seamless manner in just few clicks.
 
 
+### To Run the Application Locally: `gunicorn --bind 127.0.0.1:5000 app:app`
+
 ### Link to Frontend Repo: https://github.com/Prashant-Dwivedi-08-01/The-TradeBook-UI
