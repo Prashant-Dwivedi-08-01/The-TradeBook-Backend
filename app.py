@@ -3,7 +3,7 @@ from flask import Flask
 from config.extensions import db
 from config.extensions import jwt
 from flask import Flask
-from api import user_api
+from api import user_api, trade_api
 from logging.config import dictConfig
 from flask_cors import CORS
 from models.jwt_blocklist_model import TokenBlocklist
@@ -44,6 +44,7 @@ def set_jwt_token():
 
 def set_app_blueprints(app):
     app.register_blueprint(user_api.user_api, url_prefix = "/api")
+    app.register_blueprint(trade_api.trade_api, url_prefix = "/api")
 
 
 def create_app():
