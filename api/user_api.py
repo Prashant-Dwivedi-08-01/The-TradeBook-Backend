@@ -1,4 +1,5 @@
 
+import re
 from flask_restful import  Api
 from flask import Blueprint
 from models.user_model import User
@@ -11,7 +12,8 @@ from utils.constants import(
     FETCH_USERS_ERROR, 
     LOGOUT_ERROR, 
     USER_LOGIN_ERROR, 
-    USER_REGISTRATION_ERROR)
+    USER_REGISTRATION_ERROR,
+    EMAIL_REGEX)
 from utils.response import set_response
 from flask import current_app as app
 from utils.common import delete_expired_jwt_tokens, revoke_jwt_token
@@ -46,6 +48,11 @@ def register():
         if not email:
             err_msg = "email is required"
             raise
+
+        if not re.fullmatch(EMAIL_REGEX, email):
+            err_msg = "Invalid Email"
+            raise
+
         if not phone:
             err_msg = "Phone is required"
             raise
@@ -124,7 +131,7 @@ def login():
     
     
 
-@user_api.route("/get_users", methods=["POST"])
+@user_api.route("/get_users", methods=["GET"])
 @jwt_required()
 def getUsers():
     err_msg = None
@@ -132,8 +139,13 @@ def getUsers():
         current_user = get_jwt_identity()
         user = User.objects(email=current_user["email"]).first()
         users = User.objects()
+
+        user_info = []
+        for user in users:
+            user_info.append(user.to_json())
+
         res = {
-            "users": users
+            "users": user_info
         }
 
         app.logger.info("[%s] All users information fetched successfully.",user.email)
@@ -162,9 +174,9 @@ def delete_account():
 
         user.delete()
 
-        revoke_jwt_token()
+        revoke_jwt_token(user)
 
-        app.logger.info("[%s] Account Deleted Successfully.", user.email)
+        app.logger.info("[%s] Account Deleted Successfully. All data removed", user.email)
         
         res = {
             "msg": "Account deleted successfully"
