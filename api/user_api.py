@@ -14,7 +14,7 @@ from utils.constants import(
     USER_REGISTRATION_ERROR)
 from utils.response import set_response
 from flask import current_app as app
-from utils.common import revoke_jwt_token
+from utils.common import delete_expired_jwt_tokens, revoke_jwt_token
 
 user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
@@ -185,7 +185,9 @@ def logout():
         current_user = get_jwt_identity()
         user = User.objects(email = current_user['email']).first()
 
-        revoke_jwt_token()
+        revoke_jwt_token(user)
+
+        delete_expired_jwt_tokens(user)
 
         app.logger.info("[%s] Logged Out Successfully", user.email)
         res = {
