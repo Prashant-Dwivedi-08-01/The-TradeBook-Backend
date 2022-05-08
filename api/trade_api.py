@@ -66,12 +66,12 @@ def entr_trade():
 
             # total qty
             total_qty = trade.total_qty
-            total_qty += qty
+            total_qty += int(qty)
             trade.total_qty = total_qty # as interger is immutable
 
-            if chart:
+            if chart and len(chart) != 0:
                 trade.chart_url = chart
-            if notes:
+            if notes and len(notes) != 0:
                 curr_notes = trade.notes
                 curr_notes.append(notes)
             
@@ -129,10 +129,10 @@ def exit_trade():
 
         # qty
         curr_total_qty = trade.total_qty
-        if curr_total_qty < qty:
+        if curr_total_qty < int(qty):
             err_msg = "Insufficient shares to exit"
             raise
-        curr_total_qty -= qty
+        curr_total_qty -= int(qty)
         trade.total_qty = curr_total_qty # as intergers are immutable
 
         # status
