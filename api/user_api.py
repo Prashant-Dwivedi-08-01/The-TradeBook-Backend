@@ -13,10 +13,13 @@ from utils.constants import(
     LOGOUT_ERROR, 
     USER_LOGIN_ERROR, 
     USER_REGISTRATION_ERROR,
+    FORGET_PASSWORD_ERROR,
+    RESET_PASSEORD_ERROR,
     EMAIL_REGEX)
 from utils.response import set_response
 from flask import current_app as app
-from utils.common import delete_expired_jwt_tokens, revoke_jwt_token
+from utils.common import delete_expired_jwt_tokens, revoke_jwt_token, mailer
+import time
 
 user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
@@ -214,3 +217,99 @@ def logout():
             err_msg = LOGOUT_ERROR
         return set_response(error=err_msg)
 
+
+@user_api.route("/forget_password", methods=['POST'])
+def forget_password():
+    err_msg = None
+    try:
+        if not request.is_json:
+            err_msg = "Please Provide Json Data"
+            raise
+
+        email = request.json.get("email", None)
+        if not email:
+            err_msg = "Registered Email is required"
+            raise
+
+        user = User.objects(email=email).first()
+
+        if not user:
+            err_msg = "This email is not registered"
+            raise
+
+        user_id = user.id
+
+  
+        current_time_stamp = time.time()
+        expiry_time_stamp = current_time_stamp + 300 # 5 min
+        
+        message = f"""
+            Your Password Reset Request is recieved.
+
+            Proceed to this link to reset your password http://127.0.0.1:5000/api/reset_password/{user_id}/{expiry_time_stamp}
+
+            If not done by you then please considering reseting your account
+        """
+        mailer(email, message)
+
+        res = {
+            "msg" : "Password Reset email sent successfully"
+        }
+        return set_response(data=res)
+    except Exception as ex:
+        app.logger.error("[%s] Error in Forget Password. Error: %s. Exception: %s", email, err_msg, str(ex))
+        if not err_msg:
+            err_msg = FORGET_PASSWORD_ERROR
+            raise
+        return set_response(error=err_msg)
+
+
+@user_api.route("/reset_password", methods=['POST'])
+@user_api.route("/reset_password/<user_id>/<expiry_time>", methods=['GET'])
+def reset_password(user_id = None, expiry_time = None):
+    err_msg = None
+    try:
+        if request.method == "GET":
+
+            user = User.objects(id=user_id).first()
+            if not user:
+                err_msg = "Invalid reset link"
+                raise
+            
+            if time.time() > float(expiry_time):
+                err_msg = "This link has expired. Please make a fresh request"
+                raise
+
+            res = {
+                "email": user.email
+            }
+            return set_response(data = res)
+        else:
+            new_password = request.json.get("new_password", None)
+            if not new_password:
+                err_msg = "New Password is required"
+                raise
+            
+            email = request.json.get("email", None)
+            if not new_password:
+                err_msg = "Email Is required"
+                raise
+            
+            user = User.objects(email=email).first()
+            if not user:
+                err_msg = "This email is not registered"
+                raise
+
+            user.set_password(new_password)
+            user.save()
+
+            res = {
+                "msg" : "Password rest successfull"
+            }
+
+            return set_response(data=res)
+    except Exception as ex:
+        app.logger.error("Error in resetting the password. Error: %s. Exception: %s", err_msg, str(ex))
+        if not err_msg:
+            err_msg = RESET_PASSEORD_ERROR
+        return set_response(error=err_msg)
