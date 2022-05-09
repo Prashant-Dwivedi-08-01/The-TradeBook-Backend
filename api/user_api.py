@@ -19,7 +19,7 @@ from utils.constants import(
 from utils.response import set_response
 from flask import current_app as app
 from utils.common import delete_expired_jwt_tokens, revoke_jwt_token, mailer
-import time
+from config.extensions import redis
 
 user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
@@ -239,16 +239,19 @@ def forget_password():
 
         user_id = user.id
 
-  
-        current_time_stamp = time.time()
-        expiry_time_stamp = current_time_stamp + 300 # 5 min
-        
+        key = f"forget_pass_{email}"
+        val = "active"
+
+        redis.set(key, val, ex=300) # expires after 5 min
+
         message = f"""
             Your Password Reset Request is recieved.
 
-            Proceed to this link to reset your password http://127.0.0.1:5000/api/reset_password/{user_id}/{expiry_time_stamp}
+            Proceed to this link to reset your password http://127.0.0.1:5000/api/reset_password/{user_id}
 
-            If not done by you then please considering reseting your account
+            This Link will expire in 5 minutes.
+
+            If not done by you then please considering reseting your password.
         """
         mailer(email, message)
 
@@ -265,8 +268,8 @@ def forget_password():
 
 
 @user_api.route("/reset_password", methods=['POST'])
-@user_api.route("/reset_password/<user_id>/<expiry_time>", methods=['GET'])
-def reset_password(user_id = None, expiry_time = None):
+@user_api.route("/reset_password/<user_id>", methods=['GET'])
+def reset_password(user_id = None):
     err_msg = None
     try:
         if request.method == "GET":
@@ -276,14 +279,18 @@ def reset_password(user_id = None, expiry_time = None):
                 err_msg = "Invalid reset link"
                 raise
             
-            if time.time() > float(expiry_time):
-                err_msg = "This link has expired. Please make a fresh request"
+            key = f"forget_pass_{user.email}"
+            expiry_status = redis.get(key)
+
+            if expiry_status == None:
+                err_msg = "Either reset period has expired or your not eligible to reset the password. Please make a fresh request"
                 raise
 
             res = {
                 "email": user.email
             }
             return set_response(data = res)
+
         else:
             new_password = request.json.get("new_password", None)
             if not new_password:
@@ -294,20 +301,30 @@ def reset_password(user_id = None, expiry_time = None):
             if not new_password:
                 err_msg = "Email Is required"
                 raise
-            
+
             user = User.objects(email=email).first()
             if not user:
                 err_msg = "This email is not registered"
                 raise
 
+            key = f"forget_pass_{email}"
+            expiry_status = redis.get(key)
+
+            if expiry_status == None:
+                err_msg = "Either reset period expired or your not eligible to reset the password. Please make a fresh request"
+                raise
+
             user.set_password(new_password)
             user.save()
+
+            redis.delete(key)
 
             res = {
                 "msg" : "Password rest successfull"
             }
 
             return set_response(data=res)
+
     except Exception as ex:
         app.logger.error("Error in resetting the password. Error: %s. Exception: %s", err_msg, str(ex))
         if not err_msg:
