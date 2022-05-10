@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-
 def register_extension(app):
     jwt.init_app(app)
     db.init_app(app)

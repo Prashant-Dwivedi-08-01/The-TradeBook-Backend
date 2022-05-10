@@ -6,5 +6,7 @@ LOGOUT_ERROR = "Error in loggin out"
 ENTER_TRADE_ERROR = "Error in inserting the entry trade information"
 EXIT_TRADE_ERROR = "Error in exiting the trade"
 FETCH_ALL_TRADES_ERROR = "Error in fetching all the trades"
+FORGET_PASSWORD_ERROR = "Error in resetting your password"
+RESET_PASSEORD_ERROR = FORGET_PASSWORD_ERROR
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
