@@ -44,7 +44,7 @@ def mailer(email, msg):
 
         port = 465
         smtp_server = "smtp.gmail.com"
-        sender_email = "194princedubey@gmail.com"
+        sender_email = os.getenv("SENDER_EMAIL")
         password = os.getenv("EMAIL_PASSWORD")
         
         receiver_email = email
