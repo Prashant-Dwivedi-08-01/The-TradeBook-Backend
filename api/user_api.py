@@ -244,13 +244,17 @@ def forget_password():
 
         redis.set(key, val, ex=300) # expires after 5 min
         
-        # For testing Locally send this link on email
+        # Local
         # Proceed to this link to reset your password http://localhost:3000/reset-password/{user_id}
+        # Hosting (Test Server)
+        # Proceed to this link to reset your password https://test-thetradebook.vercel.app/reset-password/{user_id}
+        # Hosting (Production Server)
+        # Proceed to this link to reset your password https://thetradebook.vercel.app/reset-password/{user_id}
 
         message = f"""
             Your Password Reset Request is recieved.
 
-            Proceed to this link to reset your password https://test-thetradebook.vercel.app/reset-password/{user_id}
+            Proceed to this link to reset your password https://thetradebook.vercel.app/reset-password/{user_id}
 
             This Link will expire in 5 minutes.
 
