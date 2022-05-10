@@ -63,7 +63,7 @@ def mailer(email, msg):
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, message.as_string())
         
-        app.logger.info("[%s] Email set for password reset.", email)
+        app.logger.info("[%s] Email sent for password reset.", email)
     except Exception as ex:
         app.logger.error("[%s] Error in sending the email. Exception: %s", email, str(ex))
         raise

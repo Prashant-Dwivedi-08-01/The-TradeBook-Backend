@@ -247,7 +247,7 @@ def forget_password():
         message = f"""
             Your Password Reset Request is recieved.
 
-            Proceed to this link to reset your password http://127.0.0.1:5000/api/reset_password/{user_id}
+            Proceed to this link to reset your password http://localhost:3000/reset-password/{user_id}
 
             This Link will expire in 5 minutes.
 
@@ -263,7 +263,6 @@ def forget_password():
         app.logger.error("[%s] Error in Forget Password. Error: %s. Exception: %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = FORGET_PASSWORD_ERROR
-            raise
         return set_response(error=err_msg)
 
 
@@ -322,6 +321,8 @@ def reset_password(user_id = None):
             res = {
                 "msg" : "Password rest successfull"
             }
+
+            app.logger.info("[%s] Password Successfully Reset.", email)
 
             return set_response(data=res)
 
