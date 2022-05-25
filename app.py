@@ -1,7 +1,7 @@
 from datetime import timedelta
 from flask import Flask
-from config.extensions import db
-from config.extensions import jwt
+from settings.extensions import db
+from settings.extensions import jwt
 from flask import Flask
 from api import user_api, trade_api
 from logging.config import dictConfig
@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-def register_extension(app):
+def apply_settings(app):
     jwt.init_app(app)
     db.init_app(app)
 
@@ -41,7 +41,7 @@ def set_jwt_token():
         token = TokenBlocklist.objects(jti = jti).first()
         return token is not None
 
-def set_app_blueprints(app):
+def add_end_points(app):
     app.register_blueprint(user_api.user_api, url_prefix = "/api")
     app.register_blueprint(trade_api.trade_api, url_prefix = "/api")
 
@@ -55,8 +55,8 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 
-    register_extension(app)
-    set_app_blueprints(app)
+    apply_settings(app)
+    add_end_points(app)
     set_logger()
     set_jwt_token()
 

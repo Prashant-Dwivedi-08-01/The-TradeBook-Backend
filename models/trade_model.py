@@ -1,4 +1,4 @@
-from config.extensions import db
+from settings.extensions import db
 from models.user_model import User
 from mongoengine import CASCADE
 

@@ -16,10 +16,10 @@ from utils.constants import(
     FORGET_PASSWORD_ERROR,
     RESET_PASSEORD_ERROR,
     EMAIL_REGEX)
-from utils.response import set_response
+from utils.response import respond
 from flask import current_app as app
-from utils.common import delete_expired_jwt_tokens, revoke_jwt_token, mailer
-from config.extensions import redis
+from utils.common_methods import delete_expired_jwt_tokens, revoke_jwt_token, mailer
+from settings.extensions import redis
 
 user_api = Blueprint("user_api", __name__)
 user_api_restful = Api(user_api)
@@ -27,7 +27,7 @@ user_api_restful = Api(user_api)
 
 @user_api.route("/", methods=["GET"])
 def index():
-    return set_response(data={
+    return respond(data={
         "msg":"Welcome"
     })
 
@@ -83,12 +83,12 @@ def register():
             "msg":"User registered successfully",
             "user_details": user.to_json()
         }
-        return set_response(data=res)
+        return respond(data=res)
     except Exception as ex:
         app.logger.error("[%s] Error in registering the user. Error: %s. Exception %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = USER_REGISTRATION_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
     
     
 
@@ -125,12 +125,12 @@ def login():
             "access_token": access_token,
             "user_details": user.to_json()
         }
-        return set_response(data=res)
+        return respond(data=res)
     except Exception as ex:
         app.logger.error("[%s] Error in logging. Error: %s. Exception: %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = USER_LOGIN_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
     
     
 
@@ -152,12 +152,12 @@ def getUsers():
         }
 
         app.logger.info("[%s] All users information fetched successfully.",user.email)
-        return set_response(data=res)
+        return respond(data=res)
     except Exception as ex:
         app.logger.error("[%s] Error in fetching the users. Error: %s.  Exception: %s", user.email, err_msg, str(ex))
         if not err_msg:
             err_msg = FETCH_USERS_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
 
 @user_api.route("/delete_account", methods=["DELETE"])
 @jwt_required()
@@ -184,12 +184,12 @@ def delete_account():
         res = {
             "msg": "Account deleted successfully"
         }
-        return set_response(data=res)
+        return respond(data=res)
     except Exception as ex:
         app.logger.error("[%s] Error in deleting the account. Error: %s. Exception: %s", user.email, err_msg, str(ex))  
         if not err_msg:
             err_msg = ACCOUNT_DELETE_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
 
 
 @user_api.route("/logout", methods=["POST"])
@@ -209,13 +209,13 @@ def logout():
             "msg": "Logged Out Successfully"
         }
 
-        return set_response(data=res)
+        return respond(data=res)
 
     except Exception as ex:
         app.logger.error("[%s] Error in loggin out. Error: %s. Exception: %s", user.email, err_msg, str(ex))
         if not err_msg:
             err_msg = LOGOUT_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
 
 
 @user_api.route("/forget_password", methods=['POST'])
@@ -265,12 +265,12 @@ def forget_password():
         res = {
             "msg" : "Password Reset email sent successfully"
         }
-        return set_response(data=res)
+        return respond(data=res)
     except Exception as ex:
         app.logger.error("[%s] Error in Forget Password. Error: %s. Exception: %s", email, err_msg, str(ex))
         if not err_msg:
             err_msg = FORGET_PASSWORD_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
 
 
 @user_api.route("/reset_password", methods=['POST'])
@@ -295,7 +295,7 @@ def reset_password(user_id = None):
             res = {
                 "email": user.email
             }
-            return set_response(data = res)
+            return respond(data = res)
 
         else:
             new_password = request.json.get("new_password", None)
@@ -331,10 +331,10 @@ def reset_password(user_id = None):
 
             app.logger.info("[%s] Password Successfully Reset.", email)
 
-            return set_response(data=res)
+            return respond(data=res)
 
     except Exception as ex:
         app.logger.error("Error in resetting the password. Error: %s. Exception: %s", err_msg, str(ex))
         if not err_msg:
             err_msg = RESET_PASSEORD_ERROR
-        return set_response(error=err_msg)
+        return respond(error=err_msg)
