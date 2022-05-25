@@ -1,6 +1,6 @@
 from flask import jsonify
 
-def set_response(data=None, error=None):
+def respond(data=None, error=None):
     if error:
         success = False
     else:

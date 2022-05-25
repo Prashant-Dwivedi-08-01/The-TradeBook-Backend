@@ -1,5 +1,5 @@
 import datetime
-from config.extensions import db
+from settings.extensions import db
 
 class TokenBlocklist(db.Document):
     jti = db.StringField(max_length = 36)
