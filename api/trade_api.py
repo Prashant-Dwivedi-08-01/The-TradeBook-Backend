@@ -1,7 +1,7 @@
 import datetime
 from flask import Blueprint
 from flask import current_app as app
-from utils.constants import ENTER_TRADE_ERROR, EXIT_TRADE_ERROR, FETCH_ALL_TRADES_ERROR
+from utils.constants import ENTER_TRADE_ERROR, EXIT_TRADE_ERROR, FETCH_ALL_TRADES_ERROR, FETCH_TRADE_ERROR
 from utils.response import respond
 from flask_restful import Api
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -191,4 +191,33 @@ def all_trades():
         app.logger.error("[%s] Error in fetching all trades. Error: %s.  Exception: %s", user.email, err_msg, str(ex))
         if not err_msg:
             err_msg = FETCH_ALL_TRADES_ERROR
+        return respond(error=err_msg)
+
+
+@trade_api.route("/trade/<script>", methods = ["GET"])
+@jwt_required()
+def trade_info(script):
+    err_msg = None
+    try:
+        current_user = get_jwt_identity()
+        user = User.objects(email=current_user["email"]).first()
+
+        trade = Trade.objects(user=user, script=script).first()
+        if not trade:
+            err_msg = "No trade data exists for this Script"
+            raise
+        
+        res = {
+            "msg": "Trades fetched successfully",
+            "trades_info": trade
+        }
+
+        app.logger.info("[%s] Trade Data Fetched Successfully ", user.email)
+
+        return respond(data=res)
+
+    except Exception as ex:
+        app.logger.error("[%s] Error in fetching trade data. Error: %s.  Exception: %s", user.email, err_msg, str(ex))
+        if not err_msg:
+            err_msg = FETCH_TRADE_ERROR
         return respond(error=err_msg)
