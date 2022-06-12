@@ -8,6 +8,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.trade_model import Trade
 from models.user_model import User
 from flask import request
+from datetime import date
+
 
 trade_api = Blueprint("trade_api", __name__)
 trade_api_restful = Api(trade_api)
@@ -23,11 +25,13 @@ def entr_trade():
         if not request.is_json:
             err_msg="Missing JSON in request"
             raise
+        
+        today = date.today()
 
         script = request.json.get("script", None)
         price = request.json.get("price", None)
         qty = request.json.get("qty", None)
-        date = request.json.get("date", datetime.datetime.now())
+        trade_date = request.json.get("date", today.strftime("%b %d, %Y"))
         chart = request.json.get("chart", None)
         notes = request.json.get("notes", None)
 
@@ -45,7 +49,7 @@ def entr_trade():
         
         if not trade:
             entries = []
-            entries.append((date, qty, price))
+            entries.append((trade_date, qty, price))
             total_qty = qty
 
             new_trade = Trade(user=user, script=script, entries=entries, total_qty = total_qty, status = "open")
@@ -53,15 +57,19 @@ def entr_trade():
             if chart:
                 new_trade.chart_url = chart
             if notes:
+                new_note = f'[Buy @{price}] {notes}'
                 new_notes = []
-                new_notes.append(notes)
+                new_notes.append(new_note)
                 new_trade.notes = new_notes
+            
+            total_money_invest_this_entry = int(qty)*float(price)
+            new_trade.total_money_invest = total_money_invest_this_entry
             
             new_trade.save()
         else:
             # entry
             entries = trade.entries
-            entries.append((date, qty, price))
+            entries.append((trade_date, qty, price))
 
             # total qty
             total_qty = trade.total_qty
@@ -71,9 +79,16 @@ def entr_trade():
             if chart and len(chart) != 0:
                 trade.chart_url = chart
             if notes and len(notes) != 0:
+                new_note = f'[Buy @{price}] {notes}'
                 curr_notes = trade.notes
-                curr_notes.append(notes)
+                curr_notes.append(new_note)
             
+            current_total_money_invest = trade.total_money_invest
+            new_money_invest = current_total_money_invest + int(qty)*float(price)
+
+            trade.total_money_invest = new_money_invest
+
+
             trade.save()
 
         res = {
@@ -102,10 +117,12 @@ def exit_trade():
             err_msg="Missing JSON in request"
             raise
 
+        today = date.today()
+        
         script = request.json.get("script", None)
         price = request.json.get("price", None)
         qty = request.json.get("qty", None)
-        date = request.json.get("date", datetime.datetime.now())
+        trade_date = request.json.get("date", today.strftime("%b %d, %Y"))
         chart = request.json.get("chart", None)
         notes = request.json.get("notes", None)
         
@@ -139,13 +156,19 @@ def exit_trade():
 
         # exits
         curr_exits = trade.exits
-        curr_exits.append((date, qty, price))
+        curr_exits.append((trade_date, qty, price))
 
         if chart:
             trade.chart_url = chart
         if notes:
+            new_note = f'[Sell @{price}] {notes}'
             curr_notes = trade.notes
-            curr_notes.append(notes)     
+            curr_notes.append(new_note)  
+
+        current_total_money_exit = trade.total_money_exit
+        new_total_money_exit = current_total_money_exit + int(qty)*float(price)  
+
+        trade.total_money_exit = new_total_money_exit 
 
         trade.save()
 
